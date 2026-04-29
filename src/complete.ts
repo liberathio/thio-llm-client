@@ -1,7 +1,7 @@
 import { getClient } from "./client.js";
 import { assertAlias } from "./aliases.js";
 import { cachedSystem, applySystemAnd3, type AnthropicMessage } from "./cache.js";
-import type { CompleteFlat, CompleteOutput } from "./types.js";
+import type { CompleteFlat, CompleteOutput, ContentBlock } from "./types.js";
 
 /**
  * Single-shot or multi-turn completion. Always non-streaming. Use
@@ -36,11 +36,19 @@ export async function complete(input: CompleteFlat): Promise<CompleteOutput> {
       : cachedSystem(input.system, ttl)
     : undefined;
 
+  // Tools support (v0.2.0+). Anthropic's tools API also benefits from
+  // prompt caching when the LAST tool gets cache_control — so we wrap
+  // them automatically for the caller.
+  const toolsField = input.tools && input.tools.length > 0
+    ? wrapToolsWithCache(input.tools, ttl, cacheStrategy !== "none")
+    : undefined;
+
   const response = await client.messages.create({
     model: input.model,
     max_tokens: input.maxTokens ?? 1024,
     temperature: input.temperature,
     ...(systemField ? { system: systemField as never } : {}),
+    ...(toolsField ? { tools: toolsField as never } : {}),
     messages: finalMessages as never,
     metadata: buildMetadata(input),
   });
@@ -62,7 +70,29 @@ export async function complete(input: CompleteFlat): Promise<CompleteOutput> {
       cache_read_input_tokens: (response.usage as { cache_read_input_tokens?: number })
         .cache_read_input_tokens,
     },
+    stopReason: (response as { stop_reason?: string }).stop_reason,
+    content: response.content as ContentBlock[],
   };
+}
+
+/**
+ * Apply cache_control to the LAST tool when caching is enabled. Anthropic
+ * uses a single breakpoint at the end of the tools array to cache the
+ * entire prefix (system + tools), so tagging the last tool is enough.
+ *
+ * Pattern adopted from ThioBot's core/claude/toolUtils.ts which has
+ * been doing this manually — now centralized.
+ */
+function wrapToolsWithCache(
+  tools: NonNullable<CompleteFlat["tools"]>,
+  ttl: "5m" | "1h",
+  enable: boolean,
+) {
+  if (!enable || tools.length === 0) return tools;
+  return tools.map((tool, idx) => {
+    if (idx !== tools.length - 1) return tool;
+    return { ...tool, cache_control: { type: "ephemeral" as const, ttl } };
+  });
 }
 
 export function validate(input: CompleteFlat): void {

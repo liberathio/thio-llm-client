@@ -29,11 +29,18 @@ export async function complete(input) {
             ? input.system
             : cachedSystem(input.system, ttl)
         : undefined;
+    // Tools support (v0.2.0+). Anthropic's tools API also benefits from
+    // prompt caching when the LAST tool gets cache_control — so we wrap
+    // them automatically for the caller.
+    const toolsField = input.tools && input.tools.length > 0
+        ? wrapToolsWithCache(input.tools, ttl, cacheStrategy !== "none")
+        : undefined;
     const response = await client.messages.create({
         model: input.model,
         max_tokens: input.maxTokens ?? 1024,
         temperature: input.temperature,
         ...(systemField ? { system: systemField } : {}),
+        ...(toolsField ? { tools: toolsField } : {}),
         messages: finalMessages,
         metadata: buildMetadata(input),
     });
@@ -53,7 +60,26 @@ export async function complete(input) {
             cache_read_input_tokens: response.usage
                 .cache_read_input_tokens,
         },
+        stopReason: response.stop_reason,
+        content: response.content,
     };
+}
+/**
+ * Apply cache_control to the LAST tool when caching is enabled. Anthropic
+ * uses a single breakpoint at the end of the tools array to cache the
+ * entire prefix (system + tools), so tagging the last tool is enough.
+ *
+ * Pattern adopted from ThioBot's core/claude/toolUtils.ts which has
+ * been doing this manually — now centralized.
+ */
+function wrapToolsWithCache(tools, ttl, enable) {
+    if (!enable || tools.length === 0)
+        return tools;
+    return tools.map((tool, idx) => {
+        if (idx !== tools.length - 1)
+            return tool;
+        return { ...tool, cache_control: { type: "ephemeral", ttl } };
+    });
 }
 export function validate(input) {
     assertAlias(input.model);

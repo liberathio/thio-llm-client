@@ -44,5 +44,9 @@ export type {
   ModelAlias,
   CacheStrategy,
   Tag,
+  ToolDefinition,
+  ToolUseBlock,
+  TextBlock,
+  ContentBlock,
 } from "./types.js";
 export { ALLOWED_ALIASES, isAlias, assertAlias } from "./aliases.js";

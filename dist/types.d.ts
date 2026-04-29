@@ -60,7 +60,31 @@ export interface CompleteInput extends Tag {
     cacheStrategy?: CacheStrategy;
     /** Override the default 5m TTL when needed (Anthropic supports "5m" or "1h"). */
     cacheTtl?: "5m" | "1h";
+    /**
+     * Anthropic tools (v0.2.0+). Pass the tool definitions and the wrapper
+     * will run a single round-trip and return either text OR tool_use
+     * blocks for the caller to dispatch and continue. The wrapper does NOT
+     * orchestrate the tool loop itself — that's the agent's responsibility,
+     * because tool dispatch is intrinsically agent-specific.
+     */
+    tools?: ToolDefinition[];
 }
+export interface ToolDefinition {
+    name: string;
+    description?: string;
+    input_schema: Record<string, unknown>;
+}
+export interface ToolUseBlock {
+    type: "tool_use";
+    id: string;
+    name: string;
+    input: Record<string, unknown>;
+}
+export interface TextBlock {
+    type: "text";
+    text: string;
+}
+export type ContentBlock = TextBlock | ToolUseBlock;
 export type CompleteFlat = CompleteInput & (SingleShot | MultiTurn);
 export interface CompleteOutput {
     text: string;
@@ -71,6 +95,10 @@ export interface CompleteOutput {
         cache_creation_input_tokens?: number;
         cache_read_input_tokens?: number;
     };
+    /** Reason the model stopped — surface for tool loops. v0.2.0+. */
+    stopReason?: "end_turn" | "max_tokens" | "stop_sequence" | "tool_use" | string;
+    /** Full content blocks (text + tool_use). v0.2.0+. */
+    content?: ContentBlock[];
 }
 export type StreamEvent = {
     type: "delta";
