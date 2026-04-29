@@ -1,5 +1,7 @@
 node_modules/
-dist/
 *.tsbuildinfo
 .DS_Store
 coverage/
+
+# dist/ is intentionally NOT ignored — committed so consumers can install
+# via `pnpm add github:liberathio/thio-llm-client` without a build step.
