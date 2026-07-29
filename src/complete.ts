@@ -111,12 +111,37 @@ export function validate(input: CompleteFlat): void {
   }
 }
 
-export function buildMetadata(input: CompleteFlat): Record<string, string> {
-  const md: Record<string, string> = {
+/**
+ * Normalize a tag value: LiteLLM stores request_tags as a JSON array and
+ * downstream tooling splits on commas, so a comma or whitespace inside a
+ * value silently fragments the tag. Collapse both to `-`.
+ */
+function tagValue(raw: string): string {
+  return raw.trim().replace(/[,\s]+/g, "-");
+}
+
+export function buildMetadata(input: CompleteFlat): Record<string, string | string[]> {
+  const env = input.env ?? (process.env.NODE_ENV === "production" ? "production" : "development");
+
+  // Flat keys: consumed by Langfuse traces.
+  const md: Record<string, string | string[]> = {
     agent: input.agent,
     purpose: input.purpose,
-    env: input.env ?? (process.env.NODE_ENV === "production" ? "production" : "development"),
+    env,
   };
   if (input.userId) md.user_id = input.userId;
+
+  // `tags` array: the ONLY shape LiteLLM mirrors into LiteLLM_SpendLogs
+  // .request_tags and /global/spend/tags. Flat keys above are dropped by
+  // the spend tracker — verified against the live proxy 2026-07-29.
+  // Without this the call is billed but unattributable.
+  const tags = [
+    `agent:${tagValue(input.agent)}`,
+    `purpose:${tagValue(input.purpose)}`,
+    `env:${tagValue(env)}`,
+  ];
+  if (input.userId) tags.push(`user:${tagValue(input.userId)}`);
+  md.tags = tags;
+
   return md;
 }

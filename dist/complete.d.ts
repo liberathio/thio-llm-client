@@ -13,5 +13,5 @@ import type { CompleteFlat, CompleteOutput } from "./types.js";
  */
 export declare function complete(input: CompleteFlat): Promise<CompleteOutput>;
 export declare function validate(input: CompleteFlat): void;
-export declare function buildMetadata(input: CompleteFlat): Record<string, string>;
+export declare function buildMetadata(input: CompleteFlat): Record<string, string | string[]>;
 //# sourceMappingURL=complete.d.ts.map
