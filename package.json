@@ -16,6 +16,7 @@
     "src",
     "README.md"
   ],
+  "packageManager": "pnpm@10.33.0",
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
