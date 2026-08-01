@@ -33,5 +33,12 @@
     "vitest": "^3.2.7"
   },
   "license": "UNLICENSED",
-  "private": true
+  "private": true,
+  "pnpm": {
+    "overrides": {
+      "esbuild": ">=0.25.0",
+      "postcss": ">=8.5.18",
+      "vite": ">=6.4.3"
+    }
+  }
 }
