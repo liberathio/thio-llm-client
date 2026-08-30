@@ -1,6 +1,6 @@
 {
   "name": "@thio/llm-client",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Shared LLM client for Thio's agent ecosystem. Wraps Anthropic + OpenAI SDKs with mandatory tagging, alias-only models, and Anthropic's system_and_3 prompt caching strategy. All calls route through the local LiteLLM proxy.",
   "type": "module",
   "main": "./dist/index.js",

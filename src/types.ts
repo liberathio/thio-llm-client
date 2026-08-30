@@ -94,6 +94,33 @@ export interface CompleteInput extends Tag {
    * because tool dispatch is intrinsically agent-specific.
    */
   tools?: ToolDefinition[];
+  /**
+   * Structured Outputs (v0.4.0+). Passing a JSON schema makes the model emit
+   * a response that conforms to it, so the caller can `JSON.parse` the text
+   * without fishing the object out of prose.
+   *
+   * Measured against the live LiteLLM proxy on 2026-08-30 with the
+   * `claude-haiku` alias: this field travels through to Anthropic and comes
+   * back conformant. The OpenAI-shaped `response_format` does NOT — the proxy
+   * accepts the request, drops the field, and answers in markdown. That
+   * failure is silent, which is exactly why this is the only shape exposed.
+   *
+   * Anthropic requires the schema ROOT to be an object; wrap a list in a
+   * one-property object rather than passing a top-level array.
+   *
+   * Not every backend behind an alias supports it — the local `local-*`
+   * aliases (Ollama) do not. Keep a tolerant parse as a fallback for those.
+   */
+  outputConfig?: OutputConfig;
+}
+
+/** Mirrors Anthropic's `output_config`. Kept structural so callers need not import the SDK. */
+export interface OutputConfig {
+  format?: {
+    type: "json_schema";
+    schema: Record<string, unknown>;
+  };
+  effort?: "low" | "medium" | "high" | "xhigh" | "max";
 }
 
 export interface ToolDefinition {

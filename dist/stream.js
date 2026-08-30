@@ -38,6 +38,7 @@ export async function* completeStream(input) {
             max_tokens: input.maxTokens ?? 1024,
             temperature: input.temperature,
             ...(systemField ? { system: systemField } : {}),
+            ...(input.outputConfig ? { output_config: input.outputConfig } : {}),
             messages: finalMessages,
             metadata: buildMetadata(input),
         });

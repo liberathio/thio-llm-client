@@ -49,6 +49,7 @@ export async function complete(input: CompleteFlat): Promise<CompleteOutput> {
     temperature: input.temperature,
     ...(systemField ? { system: systemField as never } : {}),
     ...(toolsField ? { tools: toolsField as never } : {}),
+    ...(input.outputConfig ? { output_config: input.outputConfig as never } : {}),
     messages: finalMessages as never,
     metadata: buildMetadata(input),
   });
