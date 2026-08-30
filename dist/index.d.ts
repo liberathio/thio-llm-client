@@ -36,6 +36,6 @@ export { getClient, resetClientForTests } from "./client.js";
 export { complete } from "./complete.js";
 export { completeStream } from "./stream.js";
 export { cachedSystem, applySystemAnd3 } from "./cache.js";
-export type { CompleteInput, CompleteOutput, StreamEvent, ModelAlias, CacheStrategy, Tag, ToolDefinition, ToolUseBlock, TextBlock, ContentBlock, } from "./types.js";
+export type { CompleteInput, CompleteOutput, StreamEvent, ModelAlias, CacheStrategy, Tag, ToolDefinition, OutputConfig, ToolUseBlock, TextBlock, ContentBlock, } from "./types.js";
 export { ALLOWED_ALIASES, isAlias, assertAlias } from "./aliases.js";
 //# sourceMappingURL=index.d.ts.map

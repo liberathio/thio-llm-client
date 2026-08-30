@@ -41,6 +41,7 @@ export async function complete(input) {
         temperature: input.temperature,
         ...(systemField ? { system: systemField } : {}),
         ...(toolsField ? { tools: toolsField } : {}),
+        ...(input.outputConfig ? { output_config: input.outputConfig } : {}),
         messages: finalMessages,
         metadata: buildMetadata(input),
     });

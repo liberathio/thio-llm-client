@@ -45,6 +45,7 @@ export type {
   CacheStrategy,
   Tag,
   ToolDefinition,
+  OutputConfig,
   ToolUseBlock,
   TextBlock,
   ContentBlock,
