@@ -1,3 +1,4 @@
+import { prepareOutputConfig } from "./schema.js";
 import { getClient } from "./client.js";
 import { assertAlias } from "./aliases.js";
 import { cachedSystem, applySystemAnd3 } from "./cache.js";
@@ -41,7 +42,7 @@ export async function complete(input) {
         temperature: input.temperature,
         ...(systemField ? { system: systemField } : {}),
         ...(toolsField ? { tools: toolsField } : {}),
-        ...(input.outputConfig ? { output_config: input.outputConfig } : {}),
+        ...(input.outputConfig ? { output_config: prepareOutputConfig(input.outputConfig) } : {}),
         messages: finalMessages,
         metadata: buildMetadata(input),
     });

@@ -105,6 +105,52 @@ describe("outputConfig", () => {
     });
   });
 
+  it("limpia las palabras que Anthropic rechaza antes de enviar (v0.4.1)", async () => {
+    // Con `minimum`/`maximum` en el esquema, Anthropic devuelve 400 y el
+    // proxy cae en silencio a otro modelo. Lo que tiene que llegar al hilo
+    // es el esquema sin ellas.
+    const cuerpo = await llamar({
+      outputConfig: {
+        effort: "low",
+        format: {
+          type: "json_schema",
+          schema: {
+            type: "object",
+            properties: {
+              p: { type: "number", minimum: 0, maximum: 1 },
+              xs: { type: "array", maxItems: 3, minItems: 2, items: { type: "string" } },
+            },
+            required: ["p", "xs"],
+            additionalProperties: false,
+          },
+        },
+      },
+    });
+    expect(cuerpo?.output_config).toEqual({
+      effort: "low",
+      format: {
+        type: "json_schema",
+        schema: {
+          type: "object",
+          properties: {
+            p: { type: "number" },
+            xs: { type: "array", minItems: 1, items: { type: "string" } },
+          },
+          required: ["p", "xs"],
+          additionalProperties: false,
+        },
+      },
+    });
+  });
+
+  it("una raíz que no es objeto falla aquí, antes de salir, en vez de caer al respaldo", async () => {
+    await expect(
+      llamar({
+        outputConfig: { format: { type: "json_schema", schema: { type: "array", items: { type: "string" } } } },
+      }),
+    ).rejects.toThrow(/root must be an object/);
+  });
+
   it("no manda el campo cuando el llamante no lo pide", async () => {
     const cuerpo = await llamar({});
     expect(cuerpo).not.toHaveProperty("output_config");

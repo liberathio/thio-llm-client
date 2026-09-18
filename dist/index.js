@@ -37,4 +37,5 @@ export { complete } from "./complete.js";
 export { completeStream } from "./stream.js";
 export { cachedSystem, applySystemAnd3 } from "./cache.js";
 export { ALLOWED_ALIASES, isAlias, assertAlias } from "./aliases.js";
+export { toAnthropicSchema, assertObjectRoot, prepareOutputConfig, UNSUPPORTED_SCHEMA_KEYWORDS } from "./schema.js";
 //# sourceMappingURL=index.js.map

@@ -51,3 +51,5 @@ export type {
   ContentBlock,
 } from "./types.js";
 export { ALLOWED_ALIASES, isAlias, assertAlias } from "./aliases.js";
+
+export { toAnthropicSchema, assertObjectRoot, prepareOutputConfig, UNSUPPORTED_SCHEMA_KEYWORDS } from "./schema.js";

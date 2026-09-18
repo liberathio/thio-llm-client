@@ -1,3 +1,4 @@
+import { prepareOutputConfig } from "./schema.js";
 import { getClient } from "./client.js";
 import { applySystemAnd3, cachedSystem } from "./cache.js";
 import { validate, buildMetadata } from "./complete.js";
@@ -38,7 +39,7 @@ export async function* completeStream(input) {
             max_tokens: input.maxTokens ?? 1024,
             temperature: input.temperature,
             ...(systemField ? { system: systemField } : {}),
-            ...(input.outputConfig ? { output_config: input.outputConfig } : {}),
+            ...(input.outputConfig ? { output_config: prepareOutputConfig(input.outputConfig) } : {}),
             messages: finalMessages,
             metadata: buildMetadata(input),
         });
