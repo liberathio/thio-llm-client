@@ -1,0 +1,5 @@
+# Espera antes de instalar versiones recién publicadas (Isidro, 29 oct 2026).
+# 4320 minutos = 3 días. Para un parche urgente, la versión exacta en
+# minimumReleaseAgeExclude (p. ej. - zod@4.6.8) y se quita al pasar la espera.
+minimumReleaseAge: 4320
+minimumReleaseAgeStrict: true
